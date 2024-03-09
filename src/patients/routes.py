@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from utils.utils import hash_password, check_hash_password, db
-from flask_jwt_extended import create_access_token, create_refresh_token
-from src.models import Patient
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from src.models import Patient, Appointment
 
 
 
@@ -25,12 +25,13 @@ def register():
         return jsonify({"message":"Email already exists"})
     else:
         new_patient = Patient(
-            full_name=name, email=email, 
+            full_name=name, 
+            email=email, 
             password=hash_password(password),
             age=age
             )
         db.session.add(new_patient)
-        db.commit()
+        db.session.commit()
 
         return jsonify({
             "message":"Your account has been created",
@@ -46,7 +47,7 @@ def login():
     email = request.json.get("email")
     password = request.json.get("password")
 
-    user = Patient.query.filter_by(full_name=name).first()
+    user = Patient.query.filter_by(full_name=name, email=email).first()
     hashed_pwd = check_hash_password(user.password, password)
 
     if user and hashed_pwd:
@@ -63,3 +64,23 @@ def login():
         })
     else:
         return jsonify({"error":"Invalid credentials"}), 404
+    
+
+
+@patients.route("/patient/<int:user_id>/set-appointment", methods=["POST"])
+@jwt_required()
+def create_appointment(user_id):
+    current_user = get_jwt_identity()
+
+    sickness = request.json.get("type_of_sickness")
+    date_to_set = request.json.get("appointed_date")
+
+    if not Patient.query.filter_by(id=current_user).first():
+        return jsonify({"error":"You are not authorised"})
+    else:
+        new_appointment = Appointment(
+            type_of_sickness = sickness,
+            appointed_date = date_to_set
+        )
+        db.session.add(new_appointment)
+        db.session.commit()

@@ -1,8 +1,8 @@
 from flask import Flask
 from utils.config import Config
 from utils.utils import db, bcrypt
-from doctors.routes import doctors
-from patients.routes import patients
+from src.doctors.routes import doctors
+from src.patients.routes import patients
 from flask_jwt_extended import JWTManager
 
 

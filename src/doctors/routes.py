@@ -4,7 +4,9 @@ from src.models import Doctor
 from flask_jwt_extended import create_access_token, create_refresh_token
 
 
+
 doctors = Blueprint("doc", __name__)
+
 
 
 @doctors.route("/doctor/register", methods=["GET", "POST"])
@@ -37,7 +39,7 @@ def register():
             location=location
             )
         db.session.add(new_doctor)
-        db.commit()
+        db.session.commit()
 
         return jsonify({
             "message":"Your account has been created",
@@ -54,7 +56,7 @@ def login():
     password = request.json.get("password")
     
 
-    user = Doctor.query.filter_by(full_name=name).first()
+    user = Doctor.query.filter_by(full_name=name, email=email).first()
     hashed_pwd = check_hash_password(user.password, password)
 
     if user and hashed_pwd:
@@ -71,5 +73,3 @@ def login():
         })
     else:
         return jsonify({"error":"Invalid credentials"}), 404
-    
-
