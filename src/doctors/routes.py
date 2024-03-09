@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
-from utils.utils import hash_password, db
+from utils.utils import hash_password, db, check_hash_password
 from src.models import Doctor
+from flask_jwt_extended import create_access_token, create_refresh_token
 
 
 doctors = Blueprint("doc", __name__)
@@ -26,6 +27,35 @@ def register():
 
         return jsonify({
             "message":"Your account has been created",
-            "Full name":name,
+            "Name":name,
             "email":email
         }), 201
+
+
+
+@doctors.route("/docttor/login", methods=["GET", "POST"])
+def login():
+    name = request.json.get("full_name")
+    email = request.json.get("email")
+    password = request.json.get("password")
+
+    user = Doctor.query.filter_by(full_name=name).first()
+    hashed_pwd = check_hash_password(user.password, password)
+
+    if user and hashed_pwd:
+        access_token = create_access_token(user.id)
+        refresh_token = create_refresh_token(user.id)
+        return jsonify({
+            "message":"You have successfully logged in",
+            "access-token":access_token,
+            "refresh-token":refresh_token,
+            "user":{
+                "Name":user.full_name,
+                "email":user.email,
+            }
+        })
+    else:
+        return jsonify({"error":"Invalid credentials"}), 404
+    
+
+    
