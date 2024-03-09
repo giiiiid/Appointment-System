@@ -12,6 +12,10 @@ def register():
     name = request.json.get("full_name")
     email = request.json.get("email")
     password = request.json.get("password")
+    age = request.json.get("age")
+    doc_id = request.json.get("doc_id")
+    specialization = request.json.get("specialization")
+    location = request.json.get("location")
 
     if len(password) < 8:
         return jsonify({"error":"Characters must be at least 5"})
@@ -20,8 +24,18 @@ def register():
         return jsonify({"message":"Name already exists"})
     elif Doctor.query.filter_by(email=email).first():
         return jsonify({"message":"Email already exists"})
+    elif Doctor.query.filter_by(doc_id=doc_id).first():
+        return jsonify({"message":"Doc ID already exists"})
     else:
-        new_doctor = Doctor(full_name=name, email=email, password=hash_password(password))
+        new_doctor = Doctor(
+            full_name=name, 
+            email=email, 
+            password=hash_password(password),
+            age=age,
+            doc_id=doc_id,
+            specialization=specialization,
+            location=location
+            )
         db.session.add(new_doctor)
         db.commit()
 
@@ -38,6 +52,7 @@ def login():
     name = request.json.get("full_name")
     email = request.json.get("email")
     password = request.json.get("password")
+    
 
     user = Doctor.query.filter_by(full_name=name).first()
     hashed_pwd = check_hash_password(user.password, password)
@@ -58,4 +73,3 @@ def login():
         return jsonify({"error":"Invalid credentials"}), 404
     
 
-    

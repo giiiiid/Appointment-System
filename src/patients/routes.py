@@ -14,6 +14,7 @@ def register():
     name = request.json.get("full_name")
     email = request.json.get("email")
     password = request.json.get("password")
+    age = request.json.get("age")
 
     if len(password) < 8:
         return jsonify({"error":"Characters must be at least 5"})
@@ -23,8 +24,12 @@ def register():
     elif Patient.query.filter_by(email=email).first():
         return jsonify({"message":"Email already exists"})
     else:
-        new_doctor = Patient(full_name=name, email=email, password=hash_password(password))
-        db.session.add(new_doctor)
+        new_patient = Patient(
+            full_name=name, email=email, 
+            password=hash_password(password),
+            age=age
+            )
+        db.session.add(new_patient)
         db.commit()
 
         return jsonify({
