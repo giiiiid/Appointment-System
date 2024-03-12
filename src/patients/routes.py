@@ -23,6 +23,8 @@ def register():
         return jsonify({"message":"Name already exists"})
     elif Patient.query.filter_by(email=email).first():
         return jsonify({"message":"Email already exists"})
+    elif Patient.query.filter_by(age<18):
+        return jsonify({"message":"You are not authorised to set an appointment"})
     else:
         new_patient = Patient(
             full_name=name, 
