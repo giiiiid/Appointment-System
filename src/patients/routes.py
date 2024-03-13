@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, abort
 from utils.utils import hash_password, check_hash_password, db
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from src.models import Patient, Appointment
@@ -87,3 +87,21 @@ def create_appointment(user_id):
         )
         db.session.add(new_appointment)
         db.session.commit()
+
+
+
+@patients.route("/patient/view-appointments/<int:id>", methods=["GET", "POST"])
+@jwt_required()
+def view_appointments(id):
+    current_user = get_jwt_identity()
+
+    meeting = Appointment.query.get_or_404(id)
+    if meeting.patient != current_user:
+        abort(403)
+    else:
+        return jsonify({
+            "Name of Doctor":meeting.doctor,
+            "Email":meeting.doctor.email,
+            "Type of Sickness":meeting.type_of_sickness,
+            "Date":meeting.date
+        }), 200
