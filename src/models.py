@@ -9,7 +9,7 @@ class Doctor(db.Model):
     password = db.Column(db.String(10), unique=True, nullable=False)
     doc_id = db.Column(db.Integer, unique=True, nullable=False)
     specialization = db.Column(db.String(15), unique=True, nullable=False)
-    location = db.Column(db.String(50))
+    laddress = db.Column(db.String(50))
     appointment_id = db.Column(db.Integer, db.ForeignKey('appointment.id'), primary_key=True)
     # patients = db.relationship("Patient", backref="patient", lazy=True)
 
@@ -36,9 +36,9 @@ class Patient(db.Model):
 
 
 class Appointment(db.Model):
-    id = db.Column(db.Integer, primar_key=True)
+    id = db.Column(db.Integer, primary_key=True, index=True)
     type_of_sickness = db.Column(db.String(100))
-    appointed_date = db.Column(db.Date)
+    date = db.Column(db.Date)
     doctor_appointed = db.relationship("Doctor", backref="doctor", lazy=True)
     patient_appointed = db.relationship("Patient", backref="patient", lazy=True)
 

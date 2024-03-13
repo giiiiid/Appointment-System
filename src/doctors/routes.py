@@ -17,7 +17,7 @@ def register():
     age = request.json.get("age")
     doc_id = request.json.get("doc_id")
     specialization = request.json.get("specialization")
-    location = request.json.get("location")
+    address = request.json.get("address")
 
     if len(password) < 8:
         return jsonify({"error":"Characters must be at least 5"})
@@ -36,7 +36,7 @@ def register():
             age=age,
             doc_id=doc_id,
             specialization=specialization,
-            location=location
+            address=address
             )
         db.session.add(new_doctor)
         db.session.commit()
