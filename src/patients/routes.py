@@ -17,14 +17,13 @@ def register():
     age = request.json.get("age")
 
     if len(password) < 8:
-        return jsonify({"error":"Characters must be at least 5"})
-    
+        return jsonify({"error":"Password characters must be at least 5"})
+    elif age < 18:
+        return jsonify({"message":"You are not authorised to book"})
     if Patient.query.filter_by(full_name=name).first():
         return jsonify({"message":"Name already exists"})
     elif Patient.query.filter_by(email=email).first():
         return jsonify({"message":"Email already exists"})
-    elif Patient.query.filter_by(age<18):
-        return jsonify({"message":"You are not authorised to set an appointment"})
     else:
         new_patient = Patient(
             full_name=name, 
@@ -76,13 +75,15 @@ def create_appointment(user_id):
 
     sickness = request.json.get("type_of_sickness")
     date_to_set = request.json.get("appointed_date")
+    doctor_to_appoint = request.json.get("doctor")
 
     if not Patient.query.filter_by(id=current_user).first():
         return jsonify({"error":"You are not authorised"})
     else:
         new_appointment = Appointment(
             type_of_sickness = sickness,
-            appointed_date = date_to_set
+            appointed_date = date_to_set,
+            doctor_appointed = doctor_to_appoint
         )
         db.session.add(new_appointment)
         db.session.commit()

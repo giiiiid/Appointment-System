@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, abort
 from utils.utils import hash_password, db, check_hash_password
-from src.models import Doctor
-from flask_jwt_extended import create_access_token, create_refresh_token
+from src.models import Doctor, Appointment
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 
 
 
@@ -73,3 +73,22 @@ def login():
         })
     else:
         return jsonify({"error":"Invalid credentials"}), 404
+    
+
+
+@doctors.route("/doctor/view-appointments/<int:id>", methods=["GET","POST"])
+@jwt_required()
+def view_appointments(id):
+    current_user = get_jwt_identity()
+    
+    meeting = Appointment.query.get_or_404(id)
+    if meeting.doctor != current_user:
+        abort(403)
+    else:
+        return jsonify({
+            "Name of Patient":meeting.patient.full_name,
+            "Email":meeting.patient.email,
+            "age":meeting.patient.age,
+            "Type of Sickness":meeting.type_of_sickness,
+            "Date":meeting.date
+        }), 200
