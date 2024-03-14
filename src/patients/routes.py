@@ -105,3 +105,32 @@ def view_appointments(id):
             "Type of Sickness":meeting.type_of_sickness,
             "Date":meeting.date
         }), 200
+
+    
+
+@patients.route("/patient/update-appointments/<int:id>", methods=["GET", "POST"])
+@jwt_required()
+def update_appointment(id):
+    current_user = get_jwt_identity()
+    meeting = Appointment.query.get_or_404(id)
+    if meeting.patient != current_user:
+        abort(403)
+    
+    if request.method == "GET":
+        return jsonify({
+            "Name of Doctor": meeting.doctor,
+            "Email": meeting.doctor.email,
+            "Type of Sickness": meeting.type_of_sickness,
+            "Date": meeting.date
+        })
+    elif request.method == "PUT":
+        meeting.type_of_sickness = request.json.get("type_of_sickness")
+        meeting.doctor_appointed = request.json.get("doctor_appointed")
+        meeting.date = request.json.get("date")
+
+        return jsonify({
+            "Name of Doctor": meeting.doctor,
+            "Email": meeting.doctor.email,
+            "Type of Sickness": meeting.type_of_sickness,
+            "Date": meeting.date
+        }), 200
