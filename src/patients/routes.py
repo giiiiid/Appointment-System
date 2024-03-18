@@ -130,7 +130,7 @@ def viewlist_appointment():
 
 
 
-@patients.route("/patient/update-appointments/<int:id>", methods=["GET", "POST"])
+@patients.route("/patient/update-appointment/<int:id>", methods=["GET", "POST"])
 @jwt_required()
 def update_appointment(id):
     current_user = get_jwt_identity()

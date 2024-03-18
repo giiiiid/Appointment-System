@@ -75,7 +75,7 @@ def login():
     
 
 
-@doctors.route("/doctor/view-appointments/<int:id>", methods=["GET","POST"])
+@doctors.route("/doctor/view-appointment/<int:id>", methods=["GET","POST"])
 @jwt_required()
 def view_appointments(id):
     current_user = get_jwt_identity()
@@ -91,6 +91,20 @@ def view_appointments(id):
             "Type of Sickness":meeting.type_of_sickness,
             "Date":meeting.date
         }), 200
+
+
+
+@doctors.route("/doctor/view-appointments", methods=["GET"])
+@jwt_required()
+def viewlist_appointment():
+    current_user = get_jwt_identity()
+    meeting = Appointment.query.filter_by(doc_id == current_user).all()
+    if not meeting:
+        return jsonify({"message":"You are not authorised"})
+    elif len(meeting) == 0:
+        return jsonify({"message":"You have no appointments"})
+    else:
+        return meeting
 
 
 
