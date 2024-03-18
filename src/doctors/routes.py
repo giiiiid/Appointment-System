@@ -11,7 +11,7 @@ doctors = Blueprint("doc", __name__)
 
 @doctors.route("/doctor/register", methods=["GET", "POST"])
 def register():
-    name = request.json.get("full_name")
+    name = request.json.get("name")
     email = request.json.get("email")
     password = request.json.get("password")
     age = request.json.get("age")
@@ -49,12 +49,11 @@ def register():
 
 
 
-@doctors.route("/docttor/login", methods=["GET", "POST"])
+@doctors.route("/doctor/login", methods=["GET", "POST"])
 def login():
     name = request.json.get("full_name")
     email = request.json.get("email")
     password = request.json.get("password")
-    
 
     user = Doctor.query.filter_by(full_name=name, email=email).first()
     hashed_pwd = check_hash_password(user.password, password)
@@ -63,7 +62,7 @@ def login():
         access_token = create_access_token(user.id)
         refresh_token = create_refresh_token(user.id)
         return jsonify({
-            "message":"You have successfully logged in",
+            "message":"You have been successfully logged in",
             "access-token":access_token,
             "refresh-token":refresh_token,
             "user":{
@@ -91,4 +90,24 @@ def view_appointments(id):
             "age":meeting.patient.age,
             "Type of Sickness":meeting.type_of_sickness,
             "Date":meeting.date
+        }), 200
+
+
+
+@doctors.route("/doctor/delete-appointment/<int:id>", methods=["GET", "DELETE"])
+@jwt_required()
+def delete_appointments(id):
+    current_user = get_jwt_identity()
+
+    meeting = Appointment.query.get_or_404(id)
+    if meeting.doc_id != current_user:
+        abort(403)
+
+    if not meeting:
+        return jsonify({"message":"Appointment cannot be found"}), 404
+    else:
+        db.session.delete(meeting)
+        db.session.commit()
+        return jsonify({
+            "message":"You have successfully deleted the appointment"
         }), 200
