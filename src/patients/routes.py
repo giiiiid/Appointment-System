@@ -82,7 +82,7 @@ def update_account(id):
             "Name":current_user.full_name,
             "Email":current_user.email,
             "Age":current_user.age
-        })
+        }), 200
     
     elif request.method == "PUT":
         current_user.full_name = data.get("name")
@@ -110,7 +110,7 @@ def delete_account(id):
     else:
         db.session.delete(current_user)
         db.session.commit()
-        return jsonify({"message":"Account has been successfully deleted"})
+        return jsonify({"message":"Account has been successfully deleted"}), 200
 
 
 
@@ -169,14 +169,14 @@ def viewlist_appointment(id):
     patient = Patient.query.get_or_404(id)
     if patient.id != current_user:
         abort(403)
-        
+
     meeting = patient.appointment.all()
     if not patient:
         return jsonify({"message":"You are not authorised"})
     elif len(meeting) == 0:
         return jsonify({"message":"You have no appointments"})
     else:
-        return meeting
+        return meeting, 200
 
 
 

@@ -69,9 +69,76 @@ def login():
                 "Name":user.full_name,
                 "email":user.email,
             }
+        }), 200
+    else:
+        return jsonify({"error":"Invalid credentials"}), 404
+    
+
+@doctors.route("/patient/login", methods=["GET", "POST"])
+def login():
+    name = request.json.get("name")
+    email = request.json.get("email")
+    password = request.json.get("password")
+
+    user = Doctor.query.filter_by(full_name=name, email=email).first()
+    hashed_pwd = check_hash_password(user.password, password)
+
+    if user and hashed_pwd:
+        access_token = create_access_token(user.id)
+        refresh_token = create_refresh_token(user.id)
+        return jsonify({
+            "message":"You have been successfully logged in",
+            "access-token":access_token,
+            "refresh-token":refresh_token,
+            "user":{
+                "Name":user.full_name,
+                "email":user.email,
+            }
         })
     else:
         return jsonify({"error":"Invalid credentials"}), 404
+    
+
+
+@doctors.route("/doctor/update-account/<int:id>", methods=["GET", "PUT"])
+@jwt_required()
+def update_account(id):
+    current_user = Doctor.query.get_or_404(id)
+    if not current_user:
+        abort(403)
+    
+    data = request.json()
+
+    if request.method == "GET":
+        return jsonify({
+            "Name":current_user.full_name,
+            "Email":current_user.email,
+            "Age":current_user.age
+        }), 200
+    
+    elif request.method == "PUT":
+        current_user.full_name = data.get("name")
+        current_user.email = data.get("email")
+        current_user.age = data.get("age")
+        current_user.password = data.get("password")
+
+        db.session.commit()
+        return jsonify({
+            "message":"Account has been successfully updated",
+            "user":current_user
+        }), 200
+    
+
+
+@doctors.route("/doctor/delete-account/<int:id>", methods=["GET","DELETE"])
+def delete_account(id):
+    current_user = Doctor.query.get_or_404(id)
+    if not current_user:
+        abort(403)
+    else:
+        db.session.delete(current_user)
+        db.session.commit()
+        return jsonify({"message":"Account has been successfully deleted"}), 200
     
 
 
@@ -108,7 +175,7 @@ def viewlist_appointment():
     elif len(meeting) == 0:
         return jsonify({"message":"You have no appointments"})
     else:
-        return meeting
+        return meeting, 200
 
 
 
