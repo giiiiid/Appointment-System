@@ -94,12 +94,16 @@ def view_appointments(id):
 
 
 
-@doctors.route("/doctor/view-appointments", methods=["GET"])
+@doctors.route("/doctor/<int:id>/view-appointments", methods=["GET"])
 @jwt_required()
 def viewlist_appointment():
     current_user = get_jwt_identity()
-    meeting = Appointment.query.filter_by(doc_id == current_user).all()
-    if not meeting:
+    doctor = Doctor.query.get_or_404(id)
+    if doctor.id != current_user:
+        abort(403)
+
+    meeting = doctor.appointment.all()
+    if not doctor:
         return jsonify({"message":"You are not authorised"})
     elif len(meeting) == 0:
         return jsonify({"message":"You have no appointments"})
