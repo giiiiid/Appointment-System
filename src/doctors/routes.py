@@ -75,7 +75,7 @@ def login():
     
 
 
-@doctors.route("/doctor/view-appointment/<int:id>", methods=["GET","POST"])
+@doctors.route("/doctor/view-appointment/<int:id>", methods=["GET"])
 @jwt_required()
 def view_appointments(id):
     current_user = get_jwt_identity()

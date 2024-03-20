@@ -68,6 +68,52 @@ def login():
     
 
 
+@patients.route("/patient/update-account/<int:id>", methods=["GET", "PUT"])
+@jwt_required()
+def update_account(id):
+    current_user = Patient.query.get_or_404(id)
+    if not current_user:
+        abort(403)
+    
+    data = request.json()
+
+    if request.method == "GET":
+        return jsonify({
+            "Name":current_user.full_name,
+            "Email":current_user.email,
+            "Age":current_user.age
+        })
+    
+    elif request.method == "PUT":
+        current_user.full_name = data.get("name")
+        current_user.email = data.get("email")
+        current_user.age = data.get("age")
+        current_user.password = data.get("password")
+
+        db.session.commit()
+        return jsonify({
+            "message":"Account has been successfully updated",
+            "user":current_user
+        }), 200
+        # name = request.json.get("name")
+        # email = request.json.get("email")
+        # password = request.json.get("password")
+        # age = request.json.get("age")
+
+
+
+@patients.route("patient/delete-account/<int:id>", methods=["GET","DELETE"])
+def delete_account(id):
+    current_user = Patient.query.get_or_404(id)
+    if not current_user:
+        abort(403)
+    else:
+        db.session.delete(current_user)
+        db.session.commit()
+        return jsonify({"message":"Account has been successfully deleted"})
+
+
+
 @patients.route("/patient/set-appointment", methods=["POST"])
 @jwt_required()
 def create_appointment():
@@ -130,7 +176,7 @@ def viewlist_appointment():
 
 
 
-@patients.route("/patient/update-appointment/<int:id>", methods=["GET", "POST"])
+@patients.route("/patient/update-appointment/<int:id>", methods=["GET", "PUT"])
 @jwt_required()
 def update_appointment(id):
     current_user = get_jwt_identity()
